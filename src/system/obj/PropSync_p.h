@@ -17,6 +17,20 @@ inline bool PropSync(float &f, DataNode &node, DataArray *prop, int i, PropOp op
     return true;
 }
 
+inline bool PropSync(DataNode &obj, DataNode &node, DataArray *prop, int i, PropOp op) {
+    if (op == kPropUnknown0x40)
+        return false;
+    else {
+        MILO_ASSERT(i == prop->Size() && op <= kPropInsert, 0x19);
+        if (op == kPropGet) {
+            node = obj;
+        } else {
+            obj = node;
+        }
+        return true;
+    }
+}
+
 inline bool
 PropSync(unsigned char &uc, DataNode &node, DataArray *prop, int i, PropOp op) {
     MILO_ASSERT(i == prop->Size() && op <= kPropInsert, 0x21);
@@ -25,6 +39,24 @@ PropSync(unsigned char &uc, DataNode &node, DataArray *prop, int i, PropOp op) {
     else
         uc = node.Int();
     return true;
+}
+
+inline bool
+PropSync(DataNodeObjTrack &objTrack, DataNode &node, DataArray *prop, int i, PropOp op) {
+    if (op == kPropUnknown0x40)
+        return false;
+    else {
+        MILO_ASSERT(i == prop->Size() && op <= kPropInsert, 0x25);
+        // lol, yet another circular dependency moment
+        // DataNodeObjTrack is in Object.h,
+        // which depends on PropSync.h for the PropOp enum
+        if (op == kPropGet) {
+            // node = objTrack.Node();
+        } else {
+            // objTrack = node;
+        }
+        return true;
+    }
 }
 
 inline bool PropSync(int &iref, DataNode &node, DataArray *prop, int i, PropOp op) {
@@ -251,6 +283,32 @@ bool PropSync(
 
 template <class T>
 bool PropSync(ObjPtrVec<T, ObjectDir> &, DataNode &, DataArray *, int, PropOp);
+
+template <class T>
+bool PropSync(ObjVector<T> &objVec, DataNode &node, DataArray *prop, int i, PropOp op) {
+    if (op == kPropUnknown0x40)
+        return false;
+    else if (i == prop->Size()) {
+        MILO_ASSERT(op == kPropSize || op == kPropInsert, 0x18B);
+        node = (int)objVec.size();
+        return true;
+    } else {
+        typename ObjVector<T>::iterator it = objVec.begin() + prop->Int(i++);
+        if (i < prop->Size() || op & (kPropGet | kPropSet | kPropSize)) {
+            return PropSync(*it, node, prop, i, op);
+        } else if (op == kPropRemove) {
+            objVec.erase(it);
+            return true;
+        } else if (op == kPropInsert) {
+            T item(objVec.Owner());
+            if (PropSync(item, node, prop, i, op)) {
+                objVec.insert(it, item);
+                return true;
+            }
+        }
+        return false;
+    }
+}
 
 template <class T>
 bool PropSync(ObjList<T> &objList, DataNode &node, DataArray *prop, int i, PropOp op) {

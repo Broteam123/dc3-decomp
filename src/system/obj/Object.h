@@ -207,7 +207,10 @@ private:
         Node(const Node &n);
         virtual ~Node() {}
         virtual Hmx::Object *RefOwner() const;
-        virtual void Replace(Hmx::Object *obj);
+        virtual void Replace(Hmx::Object *obj) {
+            ObjPtrVec<T1, T2> *vec = static_cast<ObjPtrVec<T1, T2> *>(mOwner);
+            vec->ReplaceNode(this, obj);
+        }
         virtual ObjRefOwner *Parent() const { return mOwner; }
 
         T1 *Obj() const { return mObject; }
@@ -261,7 +264,8 @@ public:
         bool operator!=(const const_iterator &other) const { return it != other.it; }
     };
 
-    ObjPtrVec(Hmx::Object *owner, EraseMode, ObjListMode);
+    ObjPtrVec(Hmx::Object *owner, EraseMode = (EraseMode)0, ObjListMode = kObjListNoNull);
+    ObjPtrVec(const ObjPtrVec &);
     virtual ~ObjPtrVec();
 
     iterator begin() { return iterator(mNodes.begin()); }
@@ -273,6 +277,7 @@ public:
     iterator insert(const_iterator, T1 *);
     const_iterator find(const Hmx::Object *) const;
     int size() const { return mNodes.size(); }
+    bool empty() const { return mNodes.empty(); }
     T1 *front() const { return mNodes.front(); }
     T1 *operator[](int idx) { return mNodes[idx].Obj(); }
     const T1 *operator[](int idx) const { return mNodes[idx].Obj(); }
@@ -286,7 +291,7 @@ public:
     bool Load(BinStream &, bool, ObjectDir *);
     void clear() { mNodes.clear(); }
     void reserve(unsigned int n) { mNodes.reserve(n); }
-
+    void unique();
     void Set(iterator it, T1 *obj);
 
     // see Draw.cpp for this
@@ -544,6 +549,10 @@ extern DataArray *SystemConfig(Symbol, Symbol, Symbol);
 
 #define HANDLE_SUPERCLASS(parent) HANDLE_FORWARD(parent::Handle)
 
+#define HANDLE_VIRTUAL_SUPERCLASS(parent)                                                \
+    if (ClassName() == StaticClassName())                                                \
+    HANDLE_SUPERCLASS(parent)
+
 #define END_HANDLERS                                                                     \
     if (_warn)                                                                           \
         MILO_NOTIFY("%s unhandled msg: %s", PathName(this), sym);                        \
@@ -670,6 +679,10 @@ extern DataArray *SystemConfig(Symbol, Symbol, Symbol);
     if (parent::SyncProperty(_val, _prop, _i, _op))                                      \
         return true;
 
+#define SYNC_VIRTUAL_SUPERCLASS(parent)                                                  \
+    if (ClassName() == StaticClassName())                                                \
+    SYNC_SUPERCLASS(parent)
+
 #define END_PROPSYNCS                                                                    \
     return false;                                                                        \
     }                                                                                    \
@@ -686,6 +699,11 @@ extern DataArray *SystemConfig(Symbol, Symbol, Symbol);
 #define BEGIN_SAVES(objType) void objType::Save(BinStream &bs) {
 #define SAVE_REVS(rev, alt) bs << packRevs(alt, rev);
 #define SAVE_SUPERCLASS(parent) parent::Save(bs);
+
+#define SAVE_VIRTUAL_SUPERCLASS(parent)                                                  \
+    if (ClassName() == StaticClassName())                                                \
+    SAVE_SUPERCLASS(parent)
+
 #define END_SAVES }
 // END SAVE MACRO ------------------------------------------------------------------------
 
@@ -750,6 +768,10 @@ extern DataArray *SystemConfig(Symbol, Symbol, Symbol);
     }
 
 #define LOAD_SUPERCLASS(parent) parent::Load(bs);
+
+#define LOAD_VIRTUAL_SUPERCLASS(parent)                                                  \
+    if (ClassName() == StaticClassName())                                                \
+    LOAD_SUPERCLASS(parent)
 
 #define LOAD_BITFIELD(type, name)                                                        \
     {                                                                                    \
@@ -968,6 +990,35 @@ inline TextStream &operator<<(TextStream &ts, const Hmx::Object *obj) {
         ts << "<null>";
     return ts;
 }
+
+// DataNodeObjTrack
+class DataNodeObjTrack {
+public:
+    DataNodeObjTrack(const DataNode &node) : unk0(nullptr, nullptr) {
+        unk14 = node.Evaluate();
+        if (unk14.Type() == kDataObject) {
+            unk0 = unk14.GetObj();
+        }
+    }
+    DataNode Node() const {
+        if (unk14.Type() == kDataObject) {
+            return unk0.Ptr();
+        } else
+            return unk14;
+    }
+    DataNodeObjTrack &operator=(const DataNode &node) {
+        unk14 = node.Evaluate();
+        if (unk14.Type() == kDataObject) {
+            unk0 = unk14.GetObj();
+        }
+        return *this;
+    }
+    // DataNodeObjTrack& operator=(const DataNodeObjTrack&);
+
+protected:
+    ObjPtr<Hmx::Object> unk0; // 0x0
+    DataNode unk14; // 0x14
+};
 
 // ObjVector
 template <class T>
