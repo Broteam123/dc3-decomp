@@ -54,10 +54,14 @@ public:
     void ClearBones();
     void AddBones(const std::vector<Bone> &);
     void AddBones(const std::list<Bone> &);
+    void ScaleAdd(CharBones &, float) const;
+    void ScaleDown(CharBones &, float) const;
     void Enter() {
         Zero();
         SetWeights(0);
     }
+    CompressionType GetCompression() const { return mCompression; }
+    int TotalSize() const { return mTotalSize; }
 
     static Type TypeOf(Symbol);
     static const char *SuffixOf(Type);
@@ -70,6 +74,7 @@ protected:
     void RecomputeSizes();
 
     CompressionType mCompression; // 0x4
+    /** "Bones that are animated" */
     std::vector<Bone> mBones; // 0x8
     char *mStart; // 0x14
     int mCounts[NUM_TYPES]; // 0x18 - 0x30
@@ -98,3 +103,6 @@ public:
 protected:
     virtual void ReallocateInternal();
 };
+
+BinStream &operator<<(BinStream &, const CharBones::Bone &);
+BinStream &operator>>(BinStream &, CharBones::Bone &);

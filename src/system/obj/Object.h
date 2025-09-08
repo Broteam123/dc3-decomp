@@ -268,6 +268,7 @@ public:
     ObjPtrVec(const ObjPtrVec &);
     virtual ~ObjPtrVec();
 
+    // i now have the suspicion these might be wrong but idk how to fix it yet
     iterator begin() { return iterator(mNodes.begin()); }
     iterator end() { return iterator(mNodes.end()); }
     const_iterator begin() const { return const_iterator(mNodes.begin()); }
@@ -674,6 +675,13 @@ extern DataArray *SystemConfig(Symbol, Symbol, Symbol);
 
 #define SYNC_PROP_BITFIELD_STATIC(symbol, mask_member, line_num)                         \
     { _NEW_STATIC_SYMBOL(symbol) SYNC_PROP_BITFIELD(_s, mask_member, line_num) }
+
+#define SYNC_MEMBER(s, member)                                                           \
+    {                                                                                    \
+        _NEW_STATIC_SYMBOL(s)                                                            \
+        if (sym == _s)                                                                   \
+            return member.SyncProperty(_val, _prop, _i + 1, _op);                        \
+    }
 
 #define SYNC_SUPERCLASS(parent)                                                          \
     if (parent::SyncProperty(_val, _prop, _i, _op))                                      \
