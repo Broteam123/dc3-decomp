@@ -1,5 +1,6 @@
 #pragma once
-#include "Skeleton.h"
+#include "gesture/IdentityInfo.h"
+#include "gesture/Skeleton.h"
 #include "obj/Object.h"
 
 class GestureMgr : public Hmx::Object, public SkeletonCallback {
@@ -15,6 +16,9 @@ public:
     bool IsSkeletonSitting(int) const;
     bool IsSkeletonSideways(int) const;
     Skeleton *GetActiveSkeleton();
+    IdentityInfo *GetIdentityInfo(int);
+
+    static bool sIdentityOpInProgress;
 };
 
 extern GestureMgr *TheGestureMgr;

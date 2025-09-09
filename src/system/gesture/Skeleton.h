@@ -13,6 +13,15 @@ struct TrackedJoint {
 struct SkeletonFrame;
 class ArchiveSkeleton;
 
+enum SkeletonTrackingState {
+    /** "Not Tracked" */
+    kSkeletonNotTracked = 0,
+    /** "Position Based Tracking (Blob)" */
+    kSkeletonPositionOnly = 1,
+    /** "Full Skeleton Tracking" */
+    kSkeletonTracked = 2
+};
+
 // size: 0xAD4
 class Skeleton : public BaseSkeleton {
 public:
@@ -74,10 +83,10 @@ protected:
     TrackedJoint mTrackedJoints[kNumJoints]; // 0x4
     float mCamBoneLengths[kNumBones]; // 0x914
     Transform mPlayerXfms[5]; // 0x960
-    int unkaa0; // some sort of state or enum?
+    SkeletonTrackingState mTracking; // 0xaa0
     int mQualityFlags; // 0xaa4
     int mElapsedMs; // 0xaa8
-    int unkaac;
+    int mTrackingID; // 0xaac
     Vector3 unkab0;
     int mSkeletonIdx; // 0xac0
     float unkac4;
@@ -93,9 +102,21 @@ public:
     virtual void Draw(const BaseSkeleton &, class SkeletonViz &) = 0;
 };
 
+// size 0x2f0
+struct SkeletonData {
+    SkeletonTrackingState mTracking; // 0x0
+    Vector3 unk4[kNumJoints]; // 0x4
+    Vector3 unk144[kNumJoints]; // 0x144
+    int unk284[kNumJoints]; // 0x284
+    int mQualityFlags; // 0x2d4
+    int mTrackingID; // 0x2d8
+    int unk2dc;
+    Vector3 unk2e0;
+};
+
 // size 0x11c8
 struct SkeletonFrame {
-    SkeletonFrame();
+    SkeletonFrame() {}
 
     void Create(const NUI_SKELETON_FRAME &, int);
     float TiltAngle() const;
@@ -103,9 +124,9 @@ struct SkeletonFrame {
 
     static Vector3DESmoother sUpVectorSmoother;
 
-    int unk0;
-    int unk4;
-    Vector3 unk8;
-    XMVECTOR unk18;
-    char unk[0x11a0];
+    int unk0; // 0x0 - frame number?
+    int mElapsedMs; // 0x4
+    Vector3 unk8; // 0x8 - camera angle?
+    Vector4 unk18; // 0x18 - maybe Vector4, maybe XMVECTOR, idk
+    SkeletonData mSkeletonDatas[6]; // 0x28
 };
