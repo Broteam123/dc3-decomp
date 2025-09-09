@@ -5,9 +5,7 @@
 extern "C" {
 #endif
 
-DWORD XShowNuiFriendsUI(DWORD, DWORD);
-DWORD XShowNuiPartyUI(DWORD, DWORD);
-DWORD XShowNuiGuideUI(DWORD);
+DWORD XShowNuiTroubleshooterUI();
 
 #ifdef __cplusplus
 }

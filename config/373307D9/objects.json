@@ -286,7 +286,7 @@
             "system/gesture/FitnessFilter.cpp": "MISSING",
             "system/gesture/FreestyleMotionFilter.cpp": "MISSING",
             "system/gesture/Gesture.cpp": "MISSING",
-            "system/gesture/GestureMgr.cpp": "MISSING",
+            "system/gesture/GestureMgr.cpp": "NonMatching",
             "system/gesture/HandHeightGestureFilter.cpp": "NonMatching",
             "system/gesture/HandInvokeGestureFilter.cpp": "MISSING",
             "system/gesture/HandRaisedGestureFilter.cpp": "MISSING",

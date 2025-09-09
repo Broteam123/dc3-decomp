@@ -26,7 +26,6 @@ enum SkeletonTrackingState {
 class Skeleton : public BaseSkeleton {
 public:
     Skeleton();
-    virtual ~Skeleton() {} // 0x0
     virtual void JointPos(SkeletonCoordSys, SkeletonJoint, Vector3 &) const; // 0x4
     virtual bool
     Displacement(const SkeletonHistory *, SkeletonCoordSys, SkeletonJoint, int, Vector3 &, int &)
@@ -44,7 +43,9 @@ public:
     virtual float BoneLength(SkeletonBone, SkeletonCoordSys) const; // 0x30
 
     const TrackedJoint *TrackedJoints() const { return mTrackedJoints; }
+    int TrackingID() const { return mTrackingID; }
     int SkeletonIndex() const { return mSkeletonIdx; }
+    SkeletonTrackingState TrackingState() const { return mTracking; }
     Skeleton &operator=(const Skeleton &);
     void PostUpdate() {}
     bool IsValid() const;
@@ -116,8 +117,6 @@ struct SkeletonData {
 
 // size 0x11c8
 struct SkeletonFrame {
-    SkeletonFrame() {}
-
     void Create(const NUI_SKELETON_FRAME &, int);
     float TiltAngle() const;
     static void Init();

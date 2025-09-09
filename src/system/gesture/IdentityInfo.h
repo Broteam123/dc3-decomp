@@ -2,10 +2,12 @@
 
 class IdentityInfo {
 public:
+    IdentityInfo() : unk0(0), mEnrollmentIdx(-1), mProfileMatched(0), unk9(0), unkc(-1) {}
     void PostUpdate();
 
     bool ProfileMatched() const { return mProfileMatched; }
     int EnrollmentIndex() const { return mEnrollmentIdx; }
+    void Init() { unkc = 0; }
 
 private:
     void Identified(unsigned int);
