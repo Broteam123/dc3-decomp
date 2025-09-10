@@ -31,6 +31,7 @@ BinStream &operator<<(BinStream &bs, const Key<T> &key) {
     return bs;
 }
 
+// TODO: this needs to use BinStreamRev for both return value and input
 template <class T>
 BinStream &operator>>(BinStream &bs, Key<T> &key) {
     bs >> key.value >> key.frame;
