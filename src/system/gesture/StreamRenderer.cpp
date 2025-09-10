@@ -1,7 +1,17 @@
 #include "gesture/StreamRenderer.h"
 #include "math/Color.h"
+#include "obj/Data.h"
+#include "obj/Dir.h"
 #include "obj/Object.h"
+#include "os/Debug.h"
+#include "rndobj/Cam.h"
 #include "rndobj/Draw.h"
+#include "rndobj/Rnd.h"
+#include "rndobj/Tex.h"
+#include "rndobj/Utl.h"
+
+RndCam *StreamRenderer::mCam;
+RndTex *StreamRenderer::mBlurRT[2];
 
 StreamRenderer::StreamRenderer()
     : mOutputTex(this), mForceMips(false), mDisplay(kStreamColor), mNumBlurs(4),
@@ -14,8 +24,8 @@ StreamRenderer::StreamRenderer()
       mPlayer2DepthPaletteOffset(0), mPlayerOtherDepthPaletteOffset(0),
       mBackgroundDepthPaletteOffset(0), mDrawPreClear(0), mForceDraw(0),
       mStaticColorIndices(0), mPCTestTex(this), mLagPrimaryTexture(0), unk154(0),
-      unk190(0), unk194(0), unk198(0), unk19c(0), unk1a0(0), unk1a4(0), unk1a8(0),
-      unk1ac(0) {
+      unk190(0), unk194(0), unk198(0), unk19c(0), unk1a0(0), unk1a4(0), mPinkPlayer(0),
+      mBluePlayer(0) {
     for (int i = 0; i < 6; i++) {
         mSmoothers[i].SetSmoothParameters(6, 0);
     }
@@ -27,6 +37,21 @@ StreamRenderer::~StreamRenderer() {
     delete mLaggedPrimaryTexture[0];
     delete mLaggedPrimaryTexture[1];
 }
+
+BEGIN_HANDLERS(StreamRenderer)
+    HANDLE_SUPERCLASS(RndDrawable)
+    HANDLE_SUPERCLASS(Hmx::Object)
+    HANDLE(get_render_textures, OnGetRenderTextures)
+    HANDLE_ACTION(
+        set_crew_photo_horizontal_color, SetCrewPhotoHorizontalColor(_msg->Array(2))
+    )
+    HANDLE_ACTION(set_crew_photo_vertical_color, SetCrewPhotoVerticalColor(_msg->Array(2)))
+    HANDLE_ACTION(
+        set_crew_photo_player_detected,
+        SetCrewPhotoPlayerDetected(_msg->Int(2), _msg->Int(3))
+    )
+    HANDLE_ACTION(set_crew_photo_player_centers, SetCrewPhotoPlayerCenters())
+END_HANDLERS
 
 BEGIN_PROPSYNCS(StreamRenderer)
     SYNC_PROP_MODIFY(output_texture, mOutputTex, SetOutputTex())
@@ -71,3 +96,79 @@ BEGIN_PROPSYNCS(StreamRenderer)
     SYNC_SUPERCLASS(RndDrawable)
     SYNC_SUPERCLASS(Hmx::Object)
 END_PROPSYNCS
+
+BEGIN_SAVES(StreamRenderer)
+    SAVE_REVS(0xC, 1)
+    SAVE_SUPERCLASS(Hmx::Object)
+    SAVE_SUPERCLASS(RndDrawable)
+    bs << mOutputTex;
+    bs << mForceMips;
+    bs << mDisplay;
+    bs << mPlayer1DepthColor << mPlayer2DepthColor << mPlayer3DepthColor
+       << mPlayerDepthNobody;
+    bs << mPlayer1DepthPalette << mPlayer1DepthPaletteOffset;
+    bs << mBackgroundDepthPalette << mBackgroundDepthPaletteOffset;
+    bs << mNumBlurs;
+    bs << mPCTestTex;
+    bs << mPlayer2DepthPalette << mPlayer2DepthPaletteOffset;
+    bs << mPlayerOtherDepthPalette << mPlayerOtherDepthPaletteOffset;
+    bs << mDrawPreClear << mForceDraw;
+    bs << mLagPrimaryTexture;
+    bs << mPlayer1DepthColor << mPlayer2DepthColor << mPlayer3DepthColor;
+    bs << mStaticColorIndices;
+    bs << mCrewPhotoEdgeIterations;
+    bs << mCrewPhotoEdgeOffset;
+    bs << mCrewPhotoHorizontalColor;
+    bs << mCrewPhotoVerticalColor;
+    bs << mCrewPhotoBlurStart;
+    bs << mCrewPhotoBlurWidth;
+    bs << mCrewPhotoBlurIterations;
+    bs << mCrewPhotoBackgroundBrightness;
+END_SAVES
+
+void StreamRenderer::Init() {
+    REGISTER_OBJ_FACTORY(StreamRenderer)
+    MILO_ASSERT(!mCam, 0xC9);
+    mCam = ObjectDir::Main()->New<RndCam>("[stream renderer cam]");
+    for (int i = 0; i < 2; i++) {
+        MILO_ASSERT(mBlurRT[i] == NULL, 0xCF);
+        mBlurRT[i] = Hmx::Object::New<RndTex>();
+        mBlurRT[i]->SetBitmap(
+            0x140, 0xf0, TheRnd.Bpp(), RndTex::kTexRenderedNoZ, false, nullptr
+        );
+    }
+}
+
+void StreamRenderer::Terminate() {
+    for (int i = 0; i < 2; i++) {
+        RELEASE(mBlurRT[i]);
+    }
+    RELEASE(mCam);
+}
+
+void StreamRenderer::SetPinkPlayer(int player) { mPinkPlayer = player; }
+void StreamRenderer::SetBluePlayer(int player) { mBluePlayer = player; }
+
+DataNode StreamRenderer::OnGetRenderTextures(DataArray *) {
+    return GetRenderTextures(Dir());
+}
+
+void StreamRenderer::UpdatePreClearState() {
+    TheRnd.PreClearDrawAddOrRemove(this, mDrawPreClear, false);
+}
+
+void StreamRenderer::SetCrewPhotoHorizontalColor(DataArray *cfg) {
+    if (cfg->Size() == 3) {
+        mCrewPhotoHorizontalColor.red = cfg->Float(0);
+        mCrewPhotoHorizontalColor.green = cfg->Float(1);
+        mCrewPhotoHorizontalColor.blue = cfg->Float(2);
+    }
+}
+
+void StreamRenderer::SetCrewPhotoVerticalColor(DataArray *cfg) {
+    if (cfg->Size() == 3) {
+        mCrewPhotoVerticalColor.red = cfg->Float(0);
+        mCrewPhotoVerticalColor.green = cfg->Float(1);
+        mCrewPhotoVerticalColor.blue = cfg->Float(2);
+    }
+}

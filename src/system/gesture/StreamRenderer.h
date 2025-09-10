@@ -1,7 +1,9 @@
 #pragma once
 #include "math/Color.h"
 #include "math/DoubleExponentialSmoother.h"
+#include "obj/Data.h"
 #include "obj/Object.h"
+#include "rndobj/Cam.h"
 #include "rndobj/Draw.h"
 #include "rndobj/Tex.h"
 #include "utl/MemMgr.h"
@@ -42,11 +44,15 @@ public:
     virtual void Load(BinStream &);
     // RndDrawable
     virtual void DrawShowing();
-    virtual void DrawPreClear();
+    virtual void DrawPreClear() { DrawToTexture(); }
     virtual void UpdatePreClearState();
 
     OBJ_MEM_OVERLOAD(0x25);
     NEW_OBJ(StreamRenderer);
+
+    void SetPinkPlayer(int);
+    void SetBluePlayer(int);
+    void SetCrewPhotoPlayerDetected(int, bool);
 
     void SetOutputTex() {
         if (mForceMips && mOutputTex) {
@@ -61,8 +67,22 @@ public:
         }
     }
 
+    static void Init();
+    static void Terminate();
+
+private:
+    void SetCrewPhotoPlayerCenters();
+
 protected:
     StreamRenderer();
+
+    void DrawToTexture();
+    void SetCrewPhotoHorizontalColor(DataArray *);
+    void SetCrewPhotoVerticalColor(DataArray *);
+    DataNode OnGetRenderTextures(DataArray *);
+
+    static RndCam *mCam;
+    static RndTex *mBlurRT[2];
 
     /** "Texture to write to" */
     ObjPtr<RndTex> mOutputTex; // 0x40
@@ -130,8 +150,8 @@ protected:
     float unk19c; // 0x19c
     float unk1a0; // 0x1a0
     float unk1a4; // 0x1a4
-    float unk1a8; // 0x1a8
-    float unk1ac; // 0x1ac
+    float mPinkPlayer; // 0x1a8
+    float mBluePlayer; // 0x1ac
     char filler2[0x60];
     Vector3DESmoother mSmoothers[6]; // 0x210
 };
