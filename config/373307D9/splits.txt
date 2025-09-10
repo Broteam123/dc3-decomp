@@ -3233,7 +3233,7 @@ system/rndobj/Line.cpp:
 	.pdata      start:0x822D8F98 end:0x822D9260
 	.text       start:0x82677A10 end:0x8267C090
 	.data       start:0x82F144A0 end:0x82F144BC
-	.data       start:0x830A6478 end:0x830A64B0 rename:.bss
+	.data       start:0x830A6478 end:0x830A64A0 rename:.bss
 
 system/rndobj/PropAnim.cpp:
 	.rdata      start:0x820983E0 end:0x8209A530
@@ -3243,7 +3243,7 @@ system/rndobj/PropAnim.cpp:
 	.text       start:0x82EDCD28 end:0x82EDCD40 rename:.text$yc
 	.text       start:0x82EE2988 end:0x82EE29A8 rename:.text$yd
 	.data       start:0x82F144BC end:0x82F14D20
-	.data       start:0x830A64B0 end:0x830A6538 rename:.bss
+	.data       start:0x830A64A0 end:0x830A6538 rename:.bss
 
 system/rndobj/PropKeys.cpp:
 	.rdata      start:0x8209A530 end:0x8209AE98
