@@ -1037,7 +1037,6 @@ private:
 
 public:
     ObjVector(Hmx::Object *o) : mOwner(o) {}
-
     Hmx::Object *Owner() { return mOwner; }
 
     void push_back() { resize(size() + 1); }
@@ -1056,6 +1055,22 @@ public:
         }
     }
 };
+
+// there are symbols for both BinStreamRev >> ObjVector
+// and BinStream >> ObjVector
+// hmx why??? pick one and stick with it pls
+
+template <class T>
+BinStream &operator>>(BinStreamRev &bs, ObjVector<T> &vec) {
+    unsigned int length;
+    bs >> length;
+    vec.resize(length);
+
+    for (ObjVector<T>::iterator it = vec.begin(); it != vec.end(); it++) {
+        bs >> *it;
+    }
+    return bs;
+}
 
 template <class T>
 BinStream &operator>>(BinStream &bs, ObjVector<T> &vec) {
@@ -1078,7 +1093,6 @@ private:
 
 public:
     ObjList(Hmx::Object *o) : mOwner(o) {}
-
     Hmx::Object *Owner() { return mOwner; }
 
     void resize(unsigned int ul) { Base::resize(ul, T(mOwner)); }
@@ -1106,7 +1120,7 @@ public:
 };
 
 template <class T>
-BinStream &operator>>(BinStream &bs, ObjList<T> &oList) {
+BinStream &operator>>(BinStreamRev &bs, ObjList<T> &oList) {
     unsigned int length;
     bs >> length;
     oList.resize(length);

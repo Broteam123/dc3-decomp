@@ -227,6 +227,26 @@ BinStream &operator<<(BinStream &bs, const std::vector<T, Allocator> &vec) {
     return bs;
 }
 
+// these two vector loading functions are basically the same
+// what makes this codebase choose one over the other what
+// and to make things better, this is for vector specifically
+// list uses BinStreamRev only
+// map uses BinStream only
+// but vector? noooo vector can use either
+
+template <class T, class Allocator>
+BinStreamRev &operator>>(BinStreamRev &bs, std::vector<T, Allocator> &vec) {
+    unsigned int length;
+    bs >> length;
+    vec.resize(length);
+
+    for (typename std::vector<T, Allocator>::iterator it = vec.begin(); it != vec.end();
+         it++) {
+        bs >> *it;
+    }
+    return bs;
+}
+
 template <class T, class Allocator>
 BinStream &operator>>(BinStream &bs, std::vector<T, Allocator> &vec) {
     unsigned int length;
@@ -241,20 +261,6 @@ BinStream &operator>>(BinStream &bs, std::vector<T, Allocator> &vec) {
     return bs;
 }
 
-// BinStreamRev uses this for loading a vector of enums
-template <class E, class Allocator>
-BinStreamRev &operator>>(BinStreamRev &bs, std::vector<E, Allocator> &vec) {
-    unsigned int length;
-    bs >> length;
-    vec.resize(length);
-
-    for (typename std::vector<E, Allocator>::iterator it = vec.begin(); it != vec.end();
-         it++) {
-        bs >> (int &)*it;
-    }
-    return bs;
-}
-
 template <class T, class Allocator>
 BinStream &operator<<(BinStream &bs, const std::list<T, Allocator> &list) {
     bs << list.size();
@@ -265,6 +271,9 @@ BinStream &operator<<(BinStream &bs, const std::list<T, Allocator> &list) {
     }
     return bs;
 }
+
+template <class T, class Allocator>
+BinStreamRev &operator>>(BinStreamRev &bs, std::list<T, Allocator> &list);
 
 template <class T1, class T2>
 BinStream &operator>>(BinStream &bs, std::pair<T1, T2> &p) {
