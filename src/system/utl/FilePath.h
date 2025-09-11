@@ -12,7 +12,6 @@ public:
     FilePath() : String() {}
     FilePath(const char *str);
     FilePath(const char *cc, const char *cc2);
-    // virtual ~FilePath() {} // i guess hmx didn't have this for FilePath?
 
     void Set(const char *, const char *);
 
