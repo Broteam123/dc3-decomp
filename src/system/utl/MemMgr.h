@@ -27,9 +27,9 @@ struct MemTemp {
     ~MemTemp() { MemPopTemp(); }
 };
 
-struct MemTempHeap {
-    MemTempHeap(int x) { MemPushHeap(x); }
-    ~MemTempHeap() { MemPopHeap(); }
+struct MemHeapTracker {
+    MemHeapTracker(int x) { MemPushHeap(x); }
+    ~MemHeapTracker() { MemPopHeap(); }
 };
 
 void *MemTruncate(

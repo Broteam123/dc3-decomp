@@ -1,6 +1,7 @@
 #pragma once
 #include "char/CharBone.h"
 #include "char/CharBones.h"
+#include "obj/Data.h"
 #include "obj/Dir.h"
 #include "obj/Object.h"
 #include "utl/FilePath.h"
@@ -30,18 +31,28 @@ public:
     virtual bool SyncProperty(DataNode &, DataArray *, int, PropOp);
     virtual void Save(BinStream &);
     virtual void Copy(const Hmx::Object *, Hmx::Object::CopyType);
-    virtual void Load(BinStream &);
+    virtual void Load(BinStream &bs) { ObjectDir::Load(bs); }
     virtual void PreLoad(BinStream &);
     virtual void PostLoad(BinStream &);
-
-    DataNode GetContextFlags();
-    void ListBones(std::list<CharBones::Bone> &, int, bool);
 
     OBJ_MEM_OVERLOAD(0x15)
     NEW_OBJ(CharBoneDir)
 
+    DataNode GetContextFlags();
+    void ListBones(std::list<CharBones::Bone> &, int, bool);
+    void StuffBones(CharBones &, int);
+
+    static void Init();
+    static void Terminate();
+    static DataNode GetClipTypes();
+    static CharBoneDir *FindBoneDirResource(const char *);
+    static CharBoneDir *FindResourceFromClipType(Symbol);
+    static void StuffBones(CharBones &, Symbol);
+
 protected:
     CharBoneDir();
+
+    static DataArray *sCharClipTypes;
 
     void MergeCharacter(const FilePath &);
     void SyncFilter();

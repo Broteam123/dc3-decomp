@@ -151,7 +151,7 @@ public:
     static void Init();
     static void *operator new(unsigned int s) {
         static int _x = MemFindHeap("char");
-        MemTempHeap tmp(_x);
+        MemHeapTracker tmp(_x);
         return MemAlloc(s, __FILE__, 0x51, StaticClassName().Str(), 0);
     }
     static void *operator new(unsigned int s, void *place) { return place; }

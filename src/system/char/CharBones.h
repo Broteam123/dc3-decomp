@@ -31,6 +31,7 @@ public:
     struct Bone {
         Bone() : name(), weight(1.0f) {}
         Bone(Symbol s, float w) : name(s), weight(w) {}
+        Bone(const Bone &bone) : name(bone.name), weight(bone.weight) {}
 
         /** "Bone to blend into" */
         Symbol name;

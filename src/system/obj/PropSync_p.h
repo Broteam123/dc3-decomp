@@ -4,6 +4,7 @@
 #include "obj/Data.h"
 #include "obj/Object.h"
 #include "obj/PropSync.h"
+#include "os/Debug.h"
 #include "utl/Std.h"
 
 // DO NOT try to include this header directly!
@@ -214,7 +215,18 @@ bool PropSync(Keys<T, T> &keys, DataNode &node, DataArray *prop, int i, PropOp o
 }
 
 template <class T>
-bool PropSync(T *&obj, DataNode &node, DataArray *prop, int i, PropOp op);
+bool PropSync(T *&obj, DataNode &node, DataArray *prop, int i, PropOp op) {
+    if (op == kPropUnknown0x40)
+        return false;
+    else {
+        MILO_ASSERT(i == prop->Size() && op <= kPropInsert, 0x66);
+        if (op == kPropGet)
+            node = obj;
+        else
+            obj = node.Obj<T>();
+        return true;
+    }
+}
 
 template <class T>
 bool PropSync(ObjPtr<T> &ptr, DataNode &node, DataArray *prop, int i, PropOp op) {

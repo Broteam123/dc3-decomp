@@ -141,7 +141,7 @@ END_SAVES
 
 BEGIN_COPYS(CharClip)
     static int _x = MemFindHeap("char");
-    MemTempHeap tmp(_x);
+    MemHeapTracker tmp(_x);
     COPY_SUPERCLASS(Hmx::Object)
     CREATE_COPY(CharClip)
     BEGIN_COPYING_MEMBERS
@@ -171,7 +171,7 @@ END_COPYS
 
 BEGIN_LOADS(CharClip)
     static int _x = MemFindHeap("char");
-    MemTempHeap temp(_x);
+    MemHeapTracker temp(_x);
     LOAD_REVS(bs)
     ASSERT_REVS(0x16, 0)
     int oldRev = 0;
@@ -241,7 +241,7 @@ int CharClip::Transitions::Size() const {
 
 CharClip::NodeVector *CharClip::Transitions::Resize(int size, const NodeVector *old) {
     static int _x = MemFindHeap("char");
-    MemTempHeap temp(_x);
+    MemHeapTracker temp(_x);
     int n = (int)old - (int)mNodeStart;
     MILO_ASSERT((old == NULL) || (n >= 0), 0x9B);
     if (size != BytesInMemory()) {
