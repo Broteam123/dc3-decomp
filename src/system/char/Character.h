@@ -6,6 +6,7 @@
 #include "rndobj/Draw.h"
 #include "rndobj/Env.h"
 #include "rndobj/Trans.h"
+#include "utl/MemMgr.h"
 
 class Waypoint;
 class CharEyes;
@@ -55,7 +56,7 @@ public:
     virtual bool SyncProperty(DataNode &, DataArray *, int, PropOp);
     virtual void Save(BinStream &);
     virtual void Copy(const Hmx::Object *, CopyType);
-    virtual void PreSave(BinStream &);
+    virtual void PreSave(BinStream &) { UnhookShadow(); }
     virtual void PreLoad(BinStream &);
     virtual void PostLoad(BinStream &);
     // RndDrawable
@@ -86,11 +87,18 @@ public:
     virtual void SetInterestFilterFlags(int);
     virtual void ClearInterestFilterFlags();
 
+    OBJ_MEM_OVERLOAD(0x57)
+    NEW_OBJ(Character)
+
     void SetSphereBase(RndTransformable *);
     bool SetFocusInterest(Symbol, int);
 
+    static void Init();
+
 protected:
     void UnhookShadow();
+
+    static Character *sCurrent;
 
     ObjVector<Lod> mLods; // 0x1fc
     int mLastLod; // 0x20c
