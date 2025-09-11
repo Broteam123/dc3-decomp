@@ -11,7 +11,7 @@
 // include obj/PropSync.h instead
 
 inline bool PropSync(float &f, DataNode &node, DataArray *prop, int i, PropOp op) {
-    MILO_ASSERT(i == prop->Size() && op <= kPropInsert, 0x17);
+    MILO_ASSERT(i == prop->Size() && op <= kPropInsert, 0x2F);
     if (op == kPropGet)
         node = f;
     else

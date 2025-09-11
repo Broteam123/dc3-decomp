@@ -235,7 +235,7 @@
             "system/char/CharUtl.cpp": "MISSING",
             "system/char/CharWeightSetter.cpp": "MISSING",
             "system/char/CharWeightable.cpp": "MISSING",
-            "system/char/Character.cpp": "MISSING",
+            "system/char/Character.cpp": "NonMatching",
             "system/char/CharacterTest.cpp": "MISSING",
             "system/char/ClipCollide.cpp": "MISSING",
             "system/char/ClipDistMap.cpp": "MISSING",

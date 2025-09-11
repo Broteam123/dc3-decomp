@@ -118,3 +118,8 @@ protected:
     float mOrder; // 0x20
     ObjPtrVec<RndTransformable> mClipPlanes; // 0x24
 };
+
+class DrawPtrVec : public ObjPtrVec<RndDrawable> {
+public:
+    DrawPtrVec(Hmx::Object *owner) : ObjPtrVec<RndDrawable>(owner) {}
+};

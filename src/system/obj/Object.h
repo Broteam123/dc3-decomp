@@ -218,10 +218,17 @@ private:
         /** The ObjPtrVec this Node belongs to. */
         ObjRefOwner *mOwner; // 0x10
     };
-    virtual Hmx::Object *RefOwner() const { return mOwner; }
-    virtual bool Replace(ObjRef *, Hmx::Object *);
 
 protected:
+    virtual Hmx::Object *RefOwner() const {
+        MILO_FAIL("should never be called");
+        return nullptr;
+    }
+    virtual bool Replace(ObjRef *, Hmx::Object *) {
+        MILO_FAIL("should never be called");
+        return false;
+    }
+
     void ReplaceNode(Node *, Hmx::Object *);
 
 public:
