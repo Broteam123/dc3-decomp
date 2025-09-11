@@ -187,7 +187,7 @@
             "system/char/Char.cpp": "NonMatching",
             "system/char/CharBlendBone.cpp": "MISSING",
             "system/char/CharBone.cpp": "NonMatching",
-            "system/char/CharBoneDir.cpp": "MISSING",
+            "system/char/CharBoneDir.cpp": "NonMatching",
             "system/char/CharBoneOffset.cpp": "MISSING",
             "system/char/CharBoneTwist.cpp": "MISSING",
             "system/char/CharBones.cpp": "NonMatching",

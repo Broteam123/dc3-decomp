@@ -1,4 +1,5 @@
 #pragma once
+#include "PropSync.h"
 #include "math/Key.h"
 #include "obj/Data.h"
 #include "obj/Object.h"
@@ -104,17 +105,22 @@ bool PropSync(std::vector<T> &vec, DataNode &node, DataArray *prop, int i, PropO
         node = (int)vec.size();
         return true;
     } else {
-        typename std::vector<T>::iterator it = vec.begin() + prop->Int(i++);
-        if (i < prop->Size() || op & (kPropGet | kPropSet | kPropSize)) {
-            return PropSync(*it, node, prop, i, op);
-        } else if (op == kPropRemove) {
-            vec.erase(it);
-            return true;
-        } else if (op == kPropInsert) {
-            T item;
-            if (PropSync(item, node, prop, i, op)) {
-                vec.insert(it, item);
+        int idx = prop->Int(i++);
+        if (idx >= vec.size() + (op == kPropInsert))
+            return false;
+        else {
+            typename std::vector<T>::iterator it = vec.begin() + idx;
+            if (i < prop->Size() || op & (kPropGet | kPropSet | kPropSize)) {
+                return PropSync(*it, node, prop, i, op);
+            } else if (op == kPropRemove) {
+                vec.erase(it);
                 return true;
+            } else if (op == kPropInsert) {
+                T item;
+                if (PropSync(item, node, prop, i, op)) {
+                    vec.insert(it, item);
+                    return true;
+                }
             }
         }
         return false;
@@ -131,19 +137,23 @@ bool PropSync(std::list<T> &pList, DataNode &node, DataArray *prop, int i, PropO
         return true;
     } else {
         int idx = prop->Int(i++);
-        typename std::list<T>::iterator it = pList.begin();
-        while (idx-- > 0)
-            it++;
-        if (i < prop->Size() || op & (kPropGet | kPropSet | kPropSize)) {
-            return PropSync(*it, node, prop, i, op);
-        } else if (op == kPropRemove) {
-            pList.erase(it);
-            return true;
-        } else if (op == kPropInsert) {
-            T item;
-            if (PropSync(item, node, prop, i, op)) {
-                pList.insert(it, item);
+        if (idx >= pList.size() + (op == kPropInsert))
+            return false;
+        else {
+            typename std::list<T>::iterator it = pList.begin();
+            while (idx-- > 0)
+                it++;
+            if (i < prop->Size() || op & (kPropGet | kPropSet | kPropSize)) {
+                return PropSync(*it, node, prop, i, op);
+            } else if (op == kPropRemove) {
+                pList.erase(it);
                 return true;
+            } else if (op == kPropInsert) {
+                T item;
+                if (PropSync(item, node, prop, i, op)) {
+                    pList.insert(it, item);
+                    return true;
+                }
             }
         }
         return false;

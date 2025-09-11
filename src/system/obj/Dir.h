@@ -140,14 +140,14 @@ public:
     virtual void SetName(const char *name, ObjectDir *dir) {
         Hmx::Object::SetName(name, dir);
     }
-    virtual ObjectDir *DataDir();
+    virtual ObjectDir *DataDir() { return this; }
     virtual void PreLoad(BinStream &);
     virtual void PostLoad(BinStream &);
     // ObjectDir
     virtual void SetProxyFile(const FilePath &, bool);
-    virtual const FilePath &ProxyFile();
+    virtual const FilePath &ProxyFile() { return mProxyFile; }
     virtual void SetSubDir(bool);
-    virtual DataArrayPtr GetExposedProperties();
+    virtual DataArrayPtr GetExposedProperties() { return nullptr; }
     virtual void SyncObjects();
     virtual void ResetEditorState();
     virtual InlineDirType InlineSubDirType();

@@ -28,6 +28,7 @@ public:
     OBJ_MEM_OVERLOAD(0x1B);
 
     void ClearContext(int);
+    void StuffBones(std::list<CharBones::Bone> &, int) const;
 
 protected:
     CharBone();
