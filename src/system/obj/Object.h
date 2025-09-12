@@ -534,6 +534,21 @@ extern DataArray *SystemConfig(Symbol, Symbol, Symbol);
         }                                                                                \
     }
 
+#define HANDLE_ACTION_IF_ELSE(s, cond, action_true, action_false)                        \
+    {                                                                                    \
+        _NEW_STATIC_SYMBOL(s)                                                            \
+        if (sym == _s) {                                                                 \
+            if (cond) {                                                                  \
+                /* for style, require any side-actions to be performed via comma         \
+                 * operator */                                                           \
+                (action_true);                                                           \
+            } else {                                                                     \
+                (action_false);                                                          \
+            }                                                                            \
+            return 0;                                                                    \
+        }                                                                                \
+    }
+
 #define HANDLE_ARRAY(array)                                                              \
     {                                                                                    \
         /* this needs to be placed up here to match Hmx::Object::Handle */               \

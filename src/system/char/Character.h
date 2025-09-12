@@ -1,6 +1,7 @@
 #pragma once
 #include "char/CharDriver.h"
 #include "math/Sphere.h"
+#include "obj/Data.h"
 #include "obj/Object.h"
 #include "rndobj/Dir.h"
 #include "rndobj/Draw.h"
@@ -12,22 +13,12 @@ class Waypoint;
 class CharEyes;
 class CharInterest;
 class CharacterTest;
-
-class ShadowBone : public RndTransformable {
-public:
-    ShadowBone() : mParent(this) {}
-    virtual ~ShadowBone() {}
-
-    RndTransformable *Parent() const { return mParent; }
-    void SetParent(RndTransformable *parent) { mParent = parent; }
-
-    ObjPtr<RndTransformable> mParent; // 0x90
-};
+class ShadowBone;
 
 class Character : public RndDir {
 public:
     struct Lod {
-        Lod(Hmx::Object *);
+        Lod(Hmx::Object *owner) : mScreenSize(0), mOpaque(owner), mTranslucent(owner) {}
 
         /** "when the unit sphere centered on the bounding sphere
             is smaller than this screen height fraction,
@@ -92,6 +83,9 @@ public:
 
     void SetSphereBase(RndTransformable *);
     bool SetFocusInterest(Symbol, int);
+    void MergeDraws(const Character *);
+    void FindInterestObjects(ObjectDir *);
+    void EnableBlinks(bool, bool);
 
     static void Init();
 
@@ -99,6 +93,12 @@ protected:
     void UnhookShadow();
 
     static Character *sCurrent;
+
+    ShadowBone *AddShadowBone(RndTransformable *);
+
+    DataNode OnPlayClip(DataArray *);
+    DataNode OnCopyBoundingSphere(DataArray *);
+    DataNode OnGetCurrentInterests(DataArray *);
 
     ObjVector<Lod> mLods; // 0x1fc
     int mLastLod; // 0x20c
@@ -119,7 +119,7 @@ protected:
     ObjOwnerPtr<RndTransformable> mSphereBase; // 0x254
     /** "bounding sphere for the character, fixed" */
     Sphere mBounding; // 0x268
-    std::vector<ShadowBone *> unk27c;
+    std::vector<ShadowBone *> mShadowBones; // 0x27c
     int unk288;
     /** "Test Character by animating it" */
     CharacterTest *mTest; // 0x28c

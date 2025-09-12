@@ -122,4 +122,8 @@ protected:
 class DrawPtrVec : public ObjPtrVec<RndDrawable> {
 public:
     DrawPtrVec(Hmx::Object *owner) : ObjPtrVec<RndDrawable>(owner) {}
+
+    void Draw() const;
+    RndDrawable *CollideShowing(const Segment &, float &, Plane &) const;
+    void CollideList(const Segment &, std::list<RndDrawable::Collision> &) const;
 };

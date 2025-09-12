@@ -1,11 +1,28 @@
 #include "char/Character.h"
+#include "CharInterest.h"
+#include "Waypoint.h"
 #include "char/CharacterTest.h"
+#include "obj/Dir.h"
 #include "obj/Object.h"
 #include "rndobj/Dir.h"
 #include "rndobj/Trans.h"
 #include "utl/BinStream.h"
+#include "utl/MemMgr.h"
 
 Character *Character::sCurrent;
+
+// declaration goes here because of the MEM_OVERLOAD showing .cpp
+class ShadowBone : public RndTransformable {
+public:
+    ShadowBone() : mParent(this) {}
+
+    RndTransformable *Parent() const { return mParent; }
+    void SetParent(RndTransformable *parent) { mParent = parent; }
+
+    MEM_OVERLOAD(ShadowBone, 0x29)
+
+    ObjPtr<RndTransformable> mParent; // 0x90
+};
 
 Character::Character()
     : mLods(this), mLastLod(0), mForceLod(kLOD0), mShadow(this), mTranslucent(this),
@@ -20,6 +37,23 @@ Character::~Character() {
 }
 
 BEGIN_HANDLERS(Character)
+    HANDLE_ACTION(teleport, Teleport(_msg->Obj<Waypoint>(2)))
+    HANDLE(play_clip, OnPlayClip)
+    HANDLE_ACTION(calc_bounding_sphere, CalcBoundingSphere())
+    HANDLE(copy_bounding_sphere, OnCopyBoundingSphere)
+    HANDLE_ACTION(merge_draws, MergeDraws(_msg->Obj<Character>(2)))
+    HANDLE_ACTION(find_interest_objects, FindInterestObjects(_msg->Obj<ObjectDir>(2)))
+    HANDLE_ACTION(force_interest, SetFocusInterest(_msg->Obj<CharInterest>(2), 0))
+    HANDLE_ACTION(force_interest_named, SetFocusInterest(_msg->Sym(2), 0))
+    HANDLE_ACTION_IF_ELSE(
+        enable_blink,
+        _msg->Size() > 3,
+        EnableBlinks(_msg->Int(2), _msg->Int(3)),
+        EnableBlinks(_msg->Int(2), false)
+    )
+    HANDLE(list_interest_objects, OnGetCurrentInterests)
+    HANDLE_MEMBER_PTR(mTest)
+    HANDLE_SUPERCLASS(RndDir)
 END_HANDLERS
 
 BEGIN_CUSTOM_PROPSYNC(Character::Lod)
@@ -96,4 +130,37 @@ BEGIN_COPYS(Character)
     END_COPYING_MEMBERS
 END_COPYS
 
+void Character::DrawOpaque() {
+    for (std::vector<RndDrawable *>::iterator it = mDraws.begin(); it != mDraws.end();
+         ++it) {
+        (*it)->Draw();
+    }
+    Lod *lod = mLods.size() != 0 ? &mLods[mLastLod] : nullptr;
+    if (lod) {
+        lod->mOpaque.Draw();
+    }
+}
+
+void Character::DrawTranslucent() {
+    mTranslucent.Draw();
+    Lod *lod = mLods.size() != 0 ? &mLods[mLastLod] : nullptr;
+    if (lod) {
+        lod->mTranslucent.Draw();
+    }
+}
+
 void Character::Init() { REGISTER_OBJ_FACTORY(Character) }
+
+ShadowBone *Character::AddShadowBone(RndTransformable *trans) {
+    if (!trans)
+        return 0;
+    else {
+        for (int i = 0; i < mShadowBones.size(); i++) {
+            if (mShadowBones[i]->Parent() == trans)
+                return mShadowBones[i];
+        }
+        mShadowBones.push_back(new ShadowBone());
+        mShadowBones.back()->SetParent(trans);
+        return mShadowBones.back();
+    }
+}
